@@ -6,7 +6,7 @@ void ElegantOTA_init(){
   ElegantOTA.onStart(onOTAStart);
   ElegantOTA.onProgress(onOTAProgress);
   ElegantOTA.onEnd(onOTAEnd);  
-  Serial.println("Инициализация прошивки по воздуху...");
+  Serial.println("Инициализация прошивки по воздуху - OK");
 }
 
 void onOTAStart() {

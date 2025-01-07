@@ -2,37 +2,103 @@ class configurator {
   
   #define PIN_WFIF_AP_BTN 13 // Пин кнопки для принудительной настроки МК
   #define CFG_DEBUG  // Раскоментировать при отладке
-  #include "libs/file_system.h" // Работа с файловой системой FFat
   #include "libs/wifi_connection.h" // Работа с файловой системой FFat
   public:
-    configurator() {
+    configurator(){
+
+    }
+
+    void read_config(){
+      #ifdef CFG_DEBUG
+        Serial.println("Функция read_confi конфигуратора запустилась");
+        Serial.println("wifi_cfg_path = " + wifi_cfg_path);
+        Serial.println("ui_cfg_path = " + ui_cfg_path);
+      #endif
+
+      read_wifi_cfg(wifi_cfg_path);
+    }
+
+    void init_wifi_connection() {
       #ifdef CFG_DEBUG
       Serial.println("Отработал конструктор конфигаратора.");
       #endif
       pinMode(PIN_WFIF_AP_BTN, INPUT_PULLUP);      
-      FFat_file_system_init();    // Инициируем файловую систему
-      read_wifi_cfg();            // Считывай конфигурацию подключения к WiFi
-      read_ui_cfg();              // Считывай конфигурацию методов взаимодействия с пользователем
+
 
       if (!digitalRead(PIN_WFIF_AP_BTN)){
         Serial.println("Нажата кнопка принудительной настройки МК, создаю точку доступа ");
         wifi_AP_DEFAULT_run();
       }else{
-        if(wifi_cfg.ap){
-          wifi_AP_run();
-        }else{
-          wifi_run(); // Подключаюсь к Вайфай сети
-        }  
+        wifi_run(); // Подключаюсь к Вайфай сети 
       }
 
      
     }
 
-    void set_wifi_cfg_ssid(String ssid){
-      wifi_cfg.ssid = ssid;
-      #ifdef DEBUG
-      Serial.println("Установлен SSID вашего вайфай соединения" + wifi_cfg.ssid);  
-      #endif      
+    void read_wifi_cfg(String path) {
+      #ifdef CFG_DEBUG
+        Serial.println("Функция read_wifi_cfg конфигуратора запустилась");
+        Serial.println("path = " + path);
+      #endif    
+
+      File configFile = FFat.open(path, "r");
+      // Allocate a temporary JsonDocument
+      // Don't forget to change the capacity to match your requirements.
+      // Use arduinojson.org/v6/assistant to compute the capacity.
+      StaticJsonDocument<512> doc;
+      // Deserialize the JSON document
+      DeserializationError error = deserializeJson(doc, configFile);
+      if (error){
+        #ifdef CFG_DEBUG
+        Serial.println(F("Failed to read file, using default configuration"));
+        #endif
+        wifi_cfg.ap = true;    
+      }else{
+      // Copy values from the JsonDocument to the Config
+        wifi_cfg.ssid = doc["ssid"].as<String>();
+        wifi_cfg.pwd = doc["pwd"].as<String>();
+        wifi_cfg.ap = doc["ap"];
+
+        #ifdef CFG_DEBUG
+        Serial.println("Считываем конфигурацию вайфай: ");
+        Serial.print("SSID:");
+        Serial.println(wifi_cfg.ssid);
+        Serial.print("Pasword:");
+        Serial.println(wifi_cfg.pwd);
+        Serial.print("ap Флаг: ");
+        Serial.println(wifi_cfg.ap);
+        #endif
+      }
+      configFile.close();
+    }
+
+    void save_wifi_cfg(String ssid, String pwd){
+      #ifdef CFG_DEBUG
+        Serial.println("Функция save_wifi_cfg конфигуратора запустилась");
+        Serial.println("ssid = " + ssid);
+        Serial.println("pwd = " + pwd);
+      #endif  
+
+      File configFile = FFat.open(wifi_cfg_path, "w");
+      if (!configFile) {
+        Serial.println("Failed to open config file for writing");
+      }else{
+
+        StaticJsonDocument<256> doc;
+        // Set the values in the document
+
+        
+        doc["ssid"] = ssid;
+        doc["pwd"] = pwd;
+        doc["ap"] = "false";
+        
+        // Serialize JSON to file
+        if (serializeJson(doc, configFile) == 0) {
+          Serial.println(F("Failed to write to file"));
+        }  
+
+        configFile.close();
+      }
     }
 
   private:

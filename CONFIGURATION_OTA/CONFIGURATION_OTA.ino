@@ -42,28 +42,37 @@ FtpServer ftpSrv;  //set #define FTP_DEBUG in ESP8266FtpServer.h to see ftp verb
 unsigned long ota_progress_millis = 0; // для обновления по воздуху
 
 #include "libs/configurator.h"
+#include "libs/file_system.h" // Работа с файловой системой FFat
 
-
+configurator MK;
 
 
 void setup() {
 
   Serial.begin(115200);
   
-  listen_bnt_tmr.start();
-
-  configurator MK;
-  MK.set_wifi_cfg_ssid("ssid");
+  FFat_file_system_init();    // Инициируем файловую систему
+  MK.read_config();
+  MK.init_wifi_connection();
 
   // Обработка HTTP-запросов
   HTTP_init();  
   FTP_server_init();
   ElegantOTA_init();
+
+//            КОД ДЛЯ КОНКРЕТНЫХ ПРОЕКТОВ
+  listen_bnt_tmr.start();  
+
+//      КОНЕЦ КОД ДЛЯ КОНКРЕТНЫХ ПРОЕКТОВ  
 }
 
 void loop() {
   HTTP.handleClient();
   ftpSrv.handleFTP();  //make sure in loop you call handleFTP()!!
+
+//            КОД ДЛЯ КОНКРЕТНЫХ ПРОЕКТОВ  
+
+//      КОНЕЦ КОД ДЛЯ КОНКРЕТНЫХ ПРОЕКТОВ  
 
 
 }

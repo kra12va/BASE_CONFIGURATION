@@ -40,7 +40,7 @@
       int i=0;
       WiFi.begin(wifi_cfg.ssid, wifi_cfg.pwd);
       Serial.println("Подключаюсь к вайфай сети...");
-      while ((WiFi.status() != WL_CONNECTED) && (i < 200)) {
+      while ((WiFi.status() != WL_CONNECTED) && (i < 20)) {
         delay(500);
         Serial.print(".");
         i++;

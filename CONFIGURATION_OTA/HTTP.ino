@@ -4,12 +4,13 @@ void HTTP_init(){
       HTTP.send(404, "text/plain", "Страница не найдена");                        // возвращаем на запрос текстовое сообщение "File isn't found" с кодом 404 (не найдено)
   });  
     
-  HTTP.on("/getip", handle_getIp);     //
   HTTP.on("/wifi_save", handle_wifi_save);     //
-  HTTP.on("/getconfig", handle_getConfig);
   HTTP.on("/wifiscan", handle_wifiscan);
 
+  //          ФУНКЦИИ ДЛЯ КОНКРЕТНЫХ ПРОЕКТОВ
   HTTP.on("/make_cocktail", handle_make_cocktail);
+
+  //      КОНЕЦ    ФУНКЦИИ ДЛЯ КОНКРЕТНЫХ ПРОЕКТОВ
 
 
   HTTP.begin();
@@ -19,31 +20,32 @@ void HTTP_init(){
   #endif
 }
 
+//          ФУНКЦИИ ДЛЯ КОНКРЕТНЫХ ПРОЕКТОВ
+
 void handle_make_cocktail() {
    //make_cocktail(HTTP.arg("cocktail"));
 }
 
 
-void handle_wifi_save() {
-  
-  //MK.set_wifi_cfg_ssid(HTTP.arg("ssid"))
-  //wifi_cfg.pwd = HTTP.arg("pwd");
+//       КОНЕЦ   ФУНКЦИИ ДЛЯ КОНКРЕТНЫХ ПРОЕКТОВ
 
+void handle_wifi_save() {
+
+  HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
   #ifdef DEBUG
   Serial.println("Получены параметры: ");
   Serial.println("SSID: " + HTTP.arg("ssid"));
   Serial.println("PWD: " + HTTP.arg("pwd"));
   #endif
-  //save_wifi_config(HTTP.arg("ssid"), HTTP.arg("pwd"));
-  HTTP.send(200, "text/plain", "OK");   // отправляем ответ о выполнении
+
+  MK.save_wifi_cfg(HTTP.arg("ssid"), HTTP.arg("pwd"));
   
-  
-  //FFat.end();
+  FFat.end();
   delay(1000);
   #ifdef DEBUG
   Serial.println("Перезагружаем ESP...");
   #endif
-  //ESP.restart();
+  ESP.restart();
   
 }
 
@@ -88,30 +90,6 @@ void handle_wifiscan() {
   HTTP.send(200, "text/plain", json_str);   // отправляем ответ о выполнении
 }
 
-void handle_getIp() {
-  String param;
-  //Serial.println("отработала фунция handle_getIp()"); 
-  param = "\{\"ip\": \""+ WiFi.localIP().toString() + "\"\}";
-  //Serial.print("JSon строка с айпи адресом: ");
-  //Serial.println(param);
-  
-  HTTP.send(200, "text/plain", param);   // отправляем ответ о выполнении
-}
-
-void handle_getConfig() {
-  /*
-  StaticJsonDocument<100> jsonDocument;
-  jsonDocument["ssid"] = config.ssid;
-  jsonDocument["pwd"] = config.pwd;
-  jsonDocument["ap"] = config.ap;
-  char buffer[100];
-  serializeJsonPretty(jsonDocument, buffer);
-  Serial.println("отработала фунция handle_getConfig()");
-  Serial.print("JSon строка с параметрами конфигурации: ");
-  Serial.println(buffer);  
-  HTTP.send(200, "text/plain", buffer);   // отправляем ответ о выполнении
-  */
-}
 
 
 bool handleFileRead(String path){                                       // Функция работы с файловой системой
