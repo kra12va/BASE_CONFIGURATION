@@ -1,4 +1,4 @@
-# BASE_CONFIGURATION
+# BASE_CONFIGURATION 
  Базовая конфигурация МК
  
  PIN 13 -					Кнопка "Конфигурирование системы" 
